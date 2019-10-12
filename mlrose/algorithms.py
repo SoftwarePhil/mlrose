@@ -12,7 +12,6 @@ def hill_climb(problem, max_iters=np.inf, restarts=0, init_state=None,
                curve=False, random_state=None):
     """Use standard hill climbing to find the optimum for a given
     optimization problem.
-
     Parameters
     ----------
     problem: optimization object
@@ -34,7 +33,6 @@ def hill_climb(problem, max_iters=np.inf, restarts=0, init_state=None,
     random_state: int, default: None
         If random_state is a positive integer, random_state is the seed used
         by np.random.seed(); otherwise, the random seed is not set.
-
     Returns
     -------
     best_state: array
@@ -44,7 +42,6 @@ def hill_climb(problem, max_iters=np.inf, restarts=0, init_state=None,
     fitness_curve: array
         Numpy array containing the fitness at every iteration.
         Only returned if input argument :code:`curve` is :code:`True`.
-
     References
     ----------
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
@@ -115,7 +112,6 @@ def random_hill_climb(problem, max_attempts=10, max_iters=np.inf, restarts=0,
                       init_state=None, curve=False, random_state=None):
     """Use randomized hill climbing to find the optimum for a given
     optimization problem.
-
     Parameters
     ----------
     problem: optimization object
@@ -139,7 +135,6 @@ def random_hill_climb(problem, max_attempts=10, max_iters=np.inf, restarts=0,
     random_state: int, default: None
         If random_state is a positive integer, random_state is the seed used
         by np.random.seed(); otherwise, the random seed is not set.
-
     Returns
     -------
     best_state: array
@@ -149,7 +144,6 @@ def random_hill_climb(problem, max_attempts=10, max_iters=np.inf, restarts=0,
     fitness_curve: array
         Numpy array containing the fitness at every iteration.
         Only returned if input argument :code:`curve` is :code:`True`.
-
     References
     ----------
     Brownlee, J (2011). *Clever Algorithms: Nature-Inspired Programming
@@ -227,7 +221,6 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
                         random_state=None):
     """Use simulated annealing to find the optimum for a given
     optimization problem.
-
     Parameters
     ----------
     problem: optimization object
@@ -251,7 +244,6 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
     random_state: int, default: None
         If random_state is a positive integer, random_state is the seed used
         by np.random.seed(); otherwise, the random seed is not set.
-
     Returns
     -------
     best_state: array
@@ -261,7 +253,6 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
     fitness_curve: array
         Numpy array containing the fitness at every iteration.
         Only returned if input argument :code:`curve` is :code:`True`.
-
     References
     ----------
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
@@ -332,10 +323,9 @@ def simulated_annealing(problem, schedule=GeomDecay(), max_attempts=10,
 
 
 def genetic_alg(problem, pop_size=200, mutation_prob=0.1, max_attempts=10,
-                max_iters=np.inf, curve=False, random_state=None):
+                max_iters=np.inf, curve=False, random_state=None, init_state=None):
     """Use a standard genetic algorithm to find the optimum for a given
     optimization problem.
-
     Parameters
     ----------
     problem: optimization object
@@ -359,7 +349,6 @@ def genetic_alg(problem, pop_size=200, mutation_prob=0.1, max_attempts=10,
     random_state: int, default: None
         If random_state is a positive integer, random_state is the seed used
         by np.random.seed(); otherwise, the random seed is not set.
-
     Returns
     -------
     best_state: array
@@ -370,7 +359,6 @@ def genetic_alg(problem, pop_size=200, mutation_prob=0.1, max_attempts=10,
         Numpy array of arrays containing the fitness of the entire population
         at every iteration.
         Only returned if input argument :code:`curve` is :code:`True`.
-
     References
     ----------
     Russell, S. and P. Norvig (2010). *Artificial Intelligence: A Modern
@@ -403,7 +391,12 @@ def genetic_alg(problem, pop_size=200, mutation_prob=0.1, max_attempts=10,
         fitness_curve = []
 
     # Initialize problem, population and attempts counter
-    problem.reset()
+            # Initialize optimization problem
+    if init_state is None:
+        problem.reset()
+    else:
+        problem.set_state(init_state)
+
     problem.random_pop(pop_size)
     attempts = 0
     iters = 0
@@ -456,9 +449,8 @@ def genetic_alg(problem, pop_size=200, mutation_prob=0.1, max_attempts=10,
 
 
 def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
-          max_iters=np.inf, curve=False, random_state=None, fast_mimic=False):
+          max_iters=np.inf, curve=False, random_state=None, init_state=None, fast_mimic=False):
     """Use MIMIC to find the optimum for a given optimization problem.
-
     Parameters
     ----------
     problem: optimization object
@@ -482,9 +474,8 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
         If random_state is a positive integer, random_state is the seed used
         by np.random.seed(); otherwise, the random seed is not set.
     fast_mimic: bool, default: False
-        Activate fast mimic mode to compute the mutual information in
-        vectorized form. Faster speed but requires more memory.
-
+        Activate fast mimic mode to compute the mutual information in vectorized form
+        Faster speed but requires more memory.
     Returns
     -------
     best_state: array
@@ -494,13 +485,11 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
     fitness_curve: array
         Numpy array containing the fitness at every iteration.
         Only returned if input argument :code:`curve` is :code:`True`.
-
     References
     ----------
     De Bonet, J., C. Isbell, and P. Viola (1997). MIMIC: Finding Optima by
     Estimating Probability Densities. In *Advances in Neural Information
     Processing Systems* (NIPS) 9, pp. 424–430.
-
     Note
     ----
     MIMIC cannot be used for solving continuous-state optimization problems.
@@ -534,13 +523,18 @@ def mimic(problem, pop_size=200, keep_pct=0.2, max_attempts=10,
     if curve:
         fitness_curve = []
 
-    if fast_mimic not in (True, False):
+    if not((fast_mimic == True) or (fast_mimic == False)):
         raise Exception("""fast_mimic mode must be a boolean.""")
     else:
-        problem.mimic_speed = fast_mimic
+        problem.mimic_speed=fast_mimic
 
     # Initialize problem, population and attempts counter
-    problem.reset()
+    # Initialize optimization problem
+    if init_state is None:
+        problem.reset()
+    else:
+        problem.set_state(init_state)
+        
     problem.random_pop(pop_size)
     attempts = 0
     iters = 0
